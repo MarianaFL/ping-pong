@@ -7,7 +7,7 @@
                 "command": "love .",
             },
             "windows": {
-                "command": "& 'C:\\Program Files\\LOVE\\love.exe' ."
+                "command": "& 'C:\\Program Files\\LOVE\\lovec.exe' ."
             },
             "type": "shell",
             "group": {
