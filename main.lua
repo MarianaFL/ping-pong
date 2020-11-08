@@ -4,12 +4,19 @@ function love.load()
     playerWidth = 15
     playerHeight = 50
 
+    joysticks = love.joystick.getJoysticks()
+    joystick = joysticks[1]
+    gamepad1 = {xAxis = 1, yAxis = 2}
+    gamepad2 = {xAxis = 3, yAxis = 4}
+
+
     player1 = {}
     player1.body = love.physics.newBody(world, 200, 400, "kinematic")
     player1.shape = love.physics.newRectangleShape(0, 0, playerWidth, playerHeight)
     player1.fixture = love.physics.newFixture(player1.body, player1.shape, 2)
     player1.body:setAngle(math.rad(135))
     player1.playerArea = {beginning = 0, ending = 400}
+    player1.controls = {keyboard = {up = "w", left = "a", down = "s", right = "d"}, gamepad = gamepad1}
 
     player2 = {}
     player2.body = love.physics.newBody(world, 550, 400, "kinematic")
@@ -17,6 +24,7 @@ function love.load()
     player2.fixture = love.physics.newFixture(player2.body, player2.shape, 2)
     player2.body:setAngle(math.rad(45))
     player2.playerArea = {beginning = 400, ending = 800}
+    player2.controls = {keyboard = {up = "up", left = "left", down = "down", right = "right"}, gamepad = gamepad2}
 
     
     ball = {}
@@ -27,8 +35,7 @@ function love.load()
     ball.body:setLinearVelocity(300, 0)
        
 
-    joysticks = love.joystick.getJoysticks()
-    joystick = joysticks[1]
+
 
 end
 
@@ -53,63 +60,40 @@ function validatePlayerMovement(player, nextMoveX, nextMoveY)
     return false
 end
 
-function validateDeadzone(axis1, axis2)
-    return (math.abs(axis1) >= 0.03 and math.abs(axis2) >= 0.03)
+function validateDeadzone(controller)
+    return (math.abs(joystick:getAxis(controller.xAxis)) >= 0.04 and math.abs(joystick:getAxis(controller.yAxis)) >= 0.04)
 end
 
-function movePlayer1()
+function movePlayer(player)
     local linearVelocityX = 0
     local linearVelocityY = 0
-    if love.keyboard.isDown("a") then
+    
+    playerkb = player.controls.keyboard
+
+    if love.keyboard.isDown(playerkb.left) then
         linearVelocityX = -1000
     end
 
-    if love.keyboard.isDown("s") then
+    if love.keyboard.isDown(playerkb.down) then
         linearVelocityY = 1000
     end
 
-    if love.keyboard.isDown("d") then
+    if love.keyboard.isDown(playerkb.right) then
         linearVelocityX = 1000
     end
 
-    if love.keyboard.isDown("w") then
+    if love.keyboard.isDown(playerkb.up) then
         linearVelocityY = -1000
     end
 
-    if love.keyboard.isDown("a", "s", "d", "w") then
-        player1.body:setLinearVelocity(linearVelocityX, linearVelocityY)
-    elseif joystick and validateDeadzone(joystick:getAxis(1), joystick:getAxis(2)) then
-        player1.body:setLinearVelocity(joystick:getAxis(1)*1000, joystick:getAxis(2)*1000)
+    playerGmpd = player.controls.gamepad
+
+    if love.keyboard.isDown(playerkb.left, playerkb.down, playerkb.right, playerkb.up) then
+        player.body:setLinearVelocity(linearVelocityX, linearVelocityY)
+    elseif joystick and validateDeadzone(playerGmpd) then
+        player.body:setLinearVelocity(joystick:getAxis(playerGmpd.xAxis)*1000, joystick:getAxis(playerGmpd.yAxis)*1000)
     else 
-        player1.body:setLinearVelocity(0, 0)
-    end
-end
-
-function movePlayer2()
-    local linearVelocityX = 0
-    local linearVelocityY = 0
-    if love.keyboard.isDown("left") then
-        linearVelocityX = -1000
-    end
-
-    if love.keyboard.isDown("down") then
-        linearVelocityY = 1000
-    end
-
-    if love.keyboard.isDown("right") then
-        linearVelocityX = 1000
-    end
-
-    if love.keyboard.isDown("up") then
-        linearVelocityY = -1000
-    end
-
-    if love.keyboard.isDown("left", "down", "right", "up") then
-        player2.body:setLinearVelocity(linearVelocityX, linearVelocityY)
-    elseif joystick and validateDeadzone(joystick:getAxis(3), joystick:getAxis(4)) then
-        player2.body:setLinearVelocity(joystick:getAxis(3)*1000, joystick:getAxis(4)*1000)
-    else 
-        player2.body:setLinearVelocity(0, 0)
+        player.body:setLinearVelocity(0, 0)
     end
 end
 
@@ -119,6 +103,6 @@ function love.update(dt)
     if love.keyboard.isDown("r") then
         love.event.quit("restart")
     end
-    movePlayer1()
-    movePlayer2()
+    movePlayer(player1)
+    movePlayer(player2)
 end
