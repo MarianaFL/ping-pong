@@ -6,6 +6,9 @@
             "linux": {
                 "command": "love .",
             },
+            "windows": {
+                "command": "& 'C:\\Program Files\\LOVE\\love.exe' ."
+            },
             "type": "shell",
             "group": {
                 "kind": "build",
